@@ -95,7 +95,8 @@ const AuthStore = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      return r.json();
+      if (!r.ok && r.status >= 500) return { error: `Error del servidor (${r.status}). Intenta de nuevo.` };
+      return await r.json();
     } catch { return { error: 'Sin conexión. Verifica tu internet.' }; }
   },
 

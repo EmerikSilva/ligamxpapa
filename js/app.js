@@ -1093,22 +1093,26 @@ function initAuthForms() {
     e.preventDefault();
     const btn = qs('#form-login .auth-submit');
     btn.disabled = true; btn.textContent = 'Entrando…';
-    const r = await AuthStore.login({ username: qs('#login-username').value, password: qs('#login-password').value });
-    btn.disabled = false; btn.textContent = 'Entrar';
-    r.error ? showAuthError('login', r.error) : loginUser(r.user);
+    try {
+      const r = await AuthStore.login({ username: qs('#login-username').value, password: qs('#login-password').value });
+      r.error ? showAuthError('login', r.error) : loginUser(r.user);
+    } catch { showAuthError('login', 'Error inesperado. Intenta de nuevo.'); }
+    finally { btn.disabled = false; btn.textContent = 'Entrar'; }
   });
 
   qs('#form-register').addEventListener('submit', async e => {
     e.preventDefault();
     const btn = qs('#form-register .auth-submit');
     btn.disabled = true; btn.textContent = 'Creando cuenta…';
-    const r = await AuthStore.register({
-      username: qs('#reg-username').value,
-      name:     qs('#reg-name').value,
-      password: qs('#reg-password').value,
-    });
-    btn.disabled = false; btn.textContent = 'Crear cuenta';
-    r.error ? showAuthError('register', r.error) : loginUser(r.user);
+    try {
+      const r = await AuthStore.register({
+        username: qs('#reg-username').value,
+        name:     qs('#reg-name').value,
+        password: qs('#reg-password').value,
+      });
+      r.error ? showAuthError('register', r.error) : loginUser(r.user);
+    } catch { showAuthError('register', 'Error inesperado. Intenta de nuevo.'); }
+    finally { btn.disabled = false; btn.textContent = 'Crear cuenta'; }
   });
 }
 

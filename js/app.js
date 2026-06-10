@@ -1089,19 +1089,25 @@ function initAuthForms() {
     qs('#form-register').style.display = mode === 'register' ? '' : 'none';
   }));
 
-  qs('#form-login').addEventListener('submit', e => {
+  qs('#form-login').addEventListener('submit', async e => {
     e.preventDefault();
-    const r = AuthStore.login({ username: qs('#login-username').value, password: qs('#login-password').value });
+    const btn = qs('#form-login .auth-submit');
+    btn.disabled = true; btn.textContent = 'Entrando…';
+    const r = await AuthStore.login({ username: qs('#login-username').value, password: qs('#login-password').value });
+    btn.disabled = false; btn.textContent = 'Entrar';
     r.error ? showAuthError('login', r.error) : loginUser(r.user);
   });
 
-  qs('#form-register').addEventListener('submit', e => {
+  qs('#form-register').addEventListener('submit', async e => {
     e.preventDefault();
-    const r = AuthStore.register({
+    const btn = qs('#form-register .auth-submit');
+    btn.disabled = true; btn.textContent = 'Creando cuenta…';
+    const r = await AuthStore.register({
       username: qs('#reg-username').value,
       name:     qs('#reg-name').value,
       password: qs('#reg-password').value,
     });
+    btn.disabled = false; btn.textContent = 'Crear cuenta';
     r.error ? showAuthError('register', r.error) : loginUser(r.user);
   });
 }
@@ -1135,8 +1141,11 @@ function migrateOldData(userId) {
   } catch {}
 }
 
-function loginUser(user) {
+async function loginUser(user) {
   _authUser = user;
+  // Cargar datos frescos desde Vercel Blob (fuente de verdad)
+  await TorneoStore.loadFromBlob(user.id);
+  // Migración desde formato v1 (solo si el store sigue vacío)
   migrateOldData(user.id);
   hideAuthScreen();
   renderUserMenu();
@@ -1148,9 +1157,9 @@ function loginUser(user) {
   }
 }
 
-function initApp() {
+async function initApp() {
   initAuthForms();
-  const user = AuthStore.getCurrentUser();
+  const user = await AuthStore.getCurrentUser();
   user ? loginUser(user) : showAuthScreen();
 }
 
@@ -1337,17 +1346,21 @@ qs('#btn-remove-avatar').addEventListener('click', () => {
   qs('#profile-avatar-file')._pendingAvatar = null;
 });
 
-qs('#btn-save-profile').addEventListener('click', () => {
+qs('#btn-save-profile').addEventListener('click', async () => {
   if (!_authUser) return;
-  const fileInput  = qs('#profile-avatar-file');
-  const updates = {
+  const fileInput = qs('#profile-avatar-file');
+  const updates   = {
     name:     qs('#profile-name').value,
     username: qs('#profile-username').value,
   };
   if (qs('#profile-password').value) updates.password = qs('#profile-password').value;
   if ('_pendingAvatar' in fileInput) updates.avatar = fileInput._pendingAvatar;
 
-  const r = AuthStore.updateUser(_authUser.id, updates);
+  const btn = qs('#btn-save-profile');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  const r = await AuthStore.updateUser(_authUser.id, updates);
+  btn.disabled = false; btn.textContent = 'Guardar cambios';
+
   if (r.error) {
     const el = qs('#profile-error');
     el.textContent = r.error; el.style.display = '';

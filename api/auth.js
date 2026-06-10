@@ -44,6 +44,7 @@ async function blobWrite(pathname, data) {
     headers: {
       'Authorization': `Bearer ${TOKEN}`,
       'content-type': 'application/json',
+      'x-vercel-blob-public': '0',
       'x-vercel-blob-add-random-suffix': '0',
     },
     body: JSON.stringify(data),

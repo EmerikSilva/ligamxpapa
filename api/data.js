@@ -1,4 +1,4 @@
-import { put, list } from '@vercel/blob';
+import { list } from '@vercel/blob';
 import { verifyToken } from './auth.js';
 
 const TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
@@ -15,9 +15,16 @@ async function readUserData(userId) {
 }
 
 async function writeUserData(userId, data) {
-  await put(dataKey(userId), JSON.stringify(data), {
-    access: 'public', addRandomSuffix: false, token: TOKEN,
+  const r = await fetch(`https://blob.vercel-storage.com/${dataKey(userId)}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${TOKEN}`,
+      'content-type': 'application/json',
+      'x-vercel-blob-add-random-suffix': '0',
+    },
+    body: JSON.stringify(data),
   });
+  if (!r.ok) throw new Error(`Blob write (${r.status}): ${await r.text()}`);
 }
 
 export default async function handler(req, res) {
@@ -30,17 +37,22 @@ export default async function handler(req, res) {
   const userId   = verifyToken(rawToken);
   if (!userId) return res.status(401).json({ error: 'No autorizado.' });
 
-  if (req.method === 'GET') {
-    const data = await readUserData(userId);
-    return res.json(data || { torneoActualId: null, torneos: [] });
-  }
+  try {
+    if (req.method === 'GET') {
+      const data = await readUserData(userId);
+      return res.json(data || { torneoActualId: null, torneos: [] });
+    }
 
-  if (req.method === 'POST') {
-    if (!req.body || typeof req.body !== 'object')
-      return res.status(400).json({ error: 'Datos inválidos.' });
-    await writeUserData(userId, req.body);
-    return res.json({ ok: true });
-  }
+    if (req.method === 'POST') {
+      if (!req.body || typeof req.body !== 'object')
+        return res.status(400).json({ error: 'Datos inválidos.' });
+      await writeUserData(userId, req.body);
+      return res.json({ ok: true });
+    }
 
-  return res.status(405).end();
+    return res.status(405).end();
+  } catch (err) {
+    console.error('[data] error:', err);
+    return res.status(500).json({ error: `Error interno: ${err.message}` });
+  }
 }

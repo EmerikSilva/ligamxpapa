@@ -21,11 +21,14 @@ function toast(msg, type = 'success') {
 
 /* ── Confirm dialog ────────────────────────────────────── */
 let _confirmResolve = null;
-function confirmDialog(msg, title = 'Confirmar acción') {
+function confirmDialog(msg, title = 'Confirmar acción', okLabel = 'Eliminar', okClass = 'btn-danger') {
   return new Promise(resolve => {
     _confirmResolve = resolve;
     qs('#confirm-title').textContent = title;
     qs('#confirm-message').textContent = msg;
+    const okBtn = qs('#btn-confirm-ok');
+    okBtn.textContent = okLabel;
+    okBtn.className = `btn ${okClass}`;
     openModal('modal-confirm');
   });
 }
@@ -647,7 +650,7 @@ function saveResultado() {
   const next = findNextPendingPartido(jornada, partidoId);
   if (next) {
     const nL = getTeamById(next.localId), nV = getTeamById(next.visitanteId);
-    confirmDialog(`${nL?.name} vs ${nV?.name}`, '¿Capturar el siguiente partido?')
+    confirmDialog(`${nL?.name} vs ${nV?.name}`, '¿Capturar el siguiente partido?', 'Sí, capturar', 'btn-primary')
       .then(ok => { if (ok) openResultadoModal(jornadaId, next.id); });
   }
 }

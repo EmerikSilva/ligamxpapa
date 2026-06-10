@@ -1,4 +1,4 @@
-import { list } from '@vercel/blob';
+import { put, list } from '@vercel/blob';
 import { verifyToken } from './auth.js';
 
 const TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
@@ -15,17 +15,9 @@ async function readUserData(userId) {
 }
 
 async function writeUserData(userId, data) {
-  const r = await fetch(`https://blob.vercel-storage.com/${dataKey(userId)}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${TOKEN}`,
-      'content-type': 'application/json',
-      'x-vercel-blob-public': '0',
-      'x-vercel-blob-add-random-suffix': '0',
-    },
-    body: JSON.stringify(data),
+  await put(dataKey(userId), JSON.stringify(data), {
+    access: 'public', addRandomSuffix: false, token: TOKEN,
   });
-  if (!r.ok) throw new Error(`Blob write (${r.status}): ${await r.text()}`);
 }
 
 export default async function handler(req, res) {

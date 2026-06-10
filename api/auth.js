@@ -1,4 +1,4 @@
-import { list } from '@vercel/blob';
+import { put, list } from '@vercel/blob';
 import { createHmac } from 'crypto';
 
 /* ── Token helpers ─────────────────────────────────────── */
@@ -34,23 +34,9 @@ function legacyHash(s) {
   return (h >>> 0).toString(36) + s.length.toString(36);
 }
 
-/* ── Blob helpers — fetch directo para compatibilidad con store privado ── */
+/* ── Blob helpers ──────────────────────────────────────── */
 const TOKEN     = process.env.BLOB_READ_WRITE_TOKEN;
 const USERS_KEY = 'liga-mx/users.json';
-
-async function blobWrite(pathname, data) {
-  const r = await fetch(`https://blob.vercel-storage.com/${pathname}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${TOKEN}`,
-      'content-type': 'application/json',
-      'x-vercel-blob-public': '0',
-      'x-vercel-blob-add-random-suffix': '0',
-    },
-    body: JSON.stringify(data),
-  });
-  if (!r.ok) throw new Error(`Blob write (${r.status}): ${await r.text()}`);
-}
 
 async function readUsers() {
   try {
@@ -62,7 +48,9 @@ async function readUsers() {
 }
 
 async function writeUsers(users) {
-  await blobWrite(USERS_KEY, users);
+  await put(USERS_KEY, JSON.stringify(users), {
+    access: 'public', addRandomSuffix: false, token: TOKEN,
+  });
 }
 
 /* ── Handler ───────────────────────────────────────────── */
@@ -112,7 +100,6 @@ async function _handle(req, res) {
   if (action === 'login') {
     let user = users.find(u => u.username.toLowerCase() === (username || '').trim().toLowerCase());
 
-    // Migración transparente desde localStorage
     if (!user && bootstrap?.user) {
       const bu = bootstrap.user;
       if (bu.username.toLowerCase() === username.trim().toLowerCase()
@@ -121,7 +108,9 @@ async function _handle(req, res) {
         users.push(user);
         await writeUsers(users);
         if (bootstrap.data) {
-          await blobWrite(`liga-mx/data/${user.id}.json`, bootstrap.data);
+          await put(`liga-mx/data/${user.id}.json`, JSON.stringify(bootstrap.data), {
+            access: 'public', addRandomSuffix: false, token: TOKEN,
+          });
         }
       }
     }

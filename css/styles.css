@@ -415,6 +415,18 @@ button { cursor: pointer; border: none; background: none; }
 }
 .form-input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,212,85,.13); }
 .form-input::placeholder { color: var(--text-sm); }
+
+.pwd-wrap { position: relative; }
+.pwd-wrap .form-input { padding-right: 40px; width: 100%; }
+.pwd-toggle {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 38px; background: none; border: none; cursor: pointer;
+  color: var(--text-sm); display: flex; align-items: center; justify-content: center;
+  transition: color .15s;
+}
+.pwd-toggle:hover { color: var(--text); }
+.pwd-toggle svg { width: 18px; height: 18px; pointer-events: none; }
+
 select.form-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2364748b'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; padding-right: 32px; cursor: pointer; }
 select.form-input option { background: #0c1913; color: var(--text); }
 

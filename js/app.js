@@ -50,6 +50,18 @@ document.addEventListener('click', e => { const d = e.target.closest('[data-dism
 document.addEventListener('keydown', e => { if (e.key === 'Escape') qsa('.modal-backdrop').filter(m => m.style.display === 'flex').forEach(m => closeModal(m.id)); });
 qsa('.modal-backdrop').forEach(bd => bd.addEventListener('click', e => { if (e.target === bd) closeModal(bd.id); }));
 
+/* ── Toggle visibilidad contraseña ─────────────────────── */
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.pwd-toggle');
+  if (!btn) return;
+  const input = btn.closest('.pwd-wrap').querySelector('input');
+  const show  = input.type === 'password';
+  input.type  = show ? 'text' : 'password';
+  btn.querySelector('.eye-open').style.display  = show ? 'none'  : '';
+  btn.querySelector('.eye-closed').style.display = show ? ''     : 'none';
+  btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+});
+
 /* ── Logo fallback helper ──────────────────────────────── */
 function logoImg(team, size = 'sm') {
   if (!team) return '';

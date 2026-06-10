@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liga MX — Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════ AUTH SCREEN ═══════════════════════════════ -->
+  <div id="auth-screen" class="auth-screen" style="display:none">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="auth-logo-wrap">
+          <img src="https://a.espncdn.com/i/leaguelogos/soccer/500/262.png"
+               class="auth-logo-img" alt="Liga MX"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="auth-logo-fallback" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              <path d="M2 12h20"/>
+            </svg>
+          </div>
+        </div>
+        <h1 class="auth-title">Liga <span>MX</span></h1>
+        <p class="auth-subtitle">Tracker de temporada</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-auth="login">Iniciar sesión</button>
+        <button class="auth-tab" data-auth="register">Crear cuenta</button>
+      </div>
+
+      <!-- Login -->
+      <form id="form-login" class="auth-form">
+        <div class="form-group">
+          <label class="form-label">Usuario</label>
+          <input type="text" id="login-username" class="form-input" placeholder="tu_usuario" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div id="login-error" class="auth-error" style="display:none"></div>
+        <button type="submit" class="btn btn-primary auth-submit">Entrar</button>
+      </form>
+
+      <!-- Registro -->
+      <form id="form-register" class="auth-form" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Nombre completo</label>
+          <input type="text" id="reg-name" class="form-input" placeholder="Juan Pérez" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nombre de usuario</label>
+          <input type="text" id="reg-username" class="form-input" placeholder="juan123" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña <span class="form-hint">(mínimo 4 caracteres)</span></label>
+          <input type="password" id="reg-password" class="form-input" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <div id="reg-error" class="auth-error" style="display:none"></div>
+        <button type="submit" class="btn btn-primary auth-submit">Crear cuenta</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ APP SCREEN ═══════════════════════════════ -->
+  <div id="app-screen" style="display:none">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container">
+      <div class="header-inner">
+
+        <!-- Marca -->
+        <div class="brand">
+          <div class="brand-icon liga-logo-wrap">
+            <img src="https://a.espncdn.com/i/leaguelogos/soccer/500/262.png"
+                 class="liga-logo-img" alt="Liga MX"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <svg style="display:none;width:26px;height:26px;color:#fff" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              <path d="M2 12h20"/>
+            </svg>
+          </div>
+          <div class="brand-info">
+            <h1 class="brand-name">Liga <span>MX</span></h1>
+            <span class="season-badge" id="season-badge">—</span>
+          </div>
+        </div>
+
+        <!-- Stats (centro) -->
+        <div class="header-stats" id="header-stats"></div>
+
+        <!-- Controles derecha -->
+        <div class="header-right">
+          <!-- Selector de torneo -->
+          <div class="torneo-selector" id="torneo-selector-wrap">
+            <select class="torneo-select" id="torneo-select" title="Seleccionar torneo"></select>
+            <button class="btn btn-sm btn-ghost torneo-manage-btn" id="btn-manage-torneos" title="Gestionar torneos">
+              <svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px">
+                <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Menú de usuario -->
+          <div class="user-menu" id="user-menu">
+            <button class="user-menu-btn" id="user-menu-btn">
+              <div class="user-avatar" id="header-user-avatar"><span>--</span></div>
+              <span class="user-greeting" id="header-greeting">Hola</span>
+              <svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px;color:var(--text-sm);flex-shrink:0">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+            <div class="user-dropdown" id="user-dropdown" style="display:none">
+              <button class="user-dropdown-item" id="btn-open-profile">
+                <svg viewBox="0 0 20 20" fill="currentColor" style="width:15px;height:15px">
+                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                </svg>
+                Mi perfil
+              </button>
+              <div class="user-dropdown-sep"></div>
+              <button class="user-dropdown-item danger" id="btn-logout">
+                <svg viewBox="0 0 20 20" fill="currentColor" style="width:15px;height:15px">
+                  <path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container">
+      <div class="nav-inner">
+        <button class="nav-tab active" data-tab="tabla">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 6a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2zm0 6a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z"/>
+          </svg>
+          Tabla
+        </button>
+        <button class="nav-tab" data-tab="jornadas">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+          </svg>
+          Jornadas
+        </button>
+        <button class="nav-tab" data-tab="liguilla">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+          Liguilla
+        </button>
+        <button class="nav-tab" data-tab="graficas">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+          </svg>
+          Gráficas
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="container">
+
+      <!-- TAB: TABLA -->
+      <div class="tab-panel active" id="tab-tabla">
+        <div class="section-header">
+          <h2 class="section-title">Tabla de Posiciones</h2>
+          <div class="legend">
+            <div class="legend-item">
+              <span class="legend-dot" style="background:#10b981"></span>
+              <span>Liguilla (1–8)</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-scroll">
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th class="col-pos">#</th>
+                  <th class="col-team">Equipo</th>
+                  <th title="Partidos Jugados">PJ</th>
+                  <th title="Ganados">G</th>
+                  <th title="Empates">E</th>
+                  <th title="Perdidos">P</th>
+                  <th title="Goles a Favor">GF</th>
+                  <th title="Goles en Contra">GC</th>
+                  <th title="Diferencia de Goles">DG</th>
+                  <th class="col-pts" title="Puntos">Pts</th>
+                  <th class="col-form" title="Últimos 5 partidos">Forma</th>
+                </tr>
+              </thead>
+              <tbody id="standings-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: JORNADAS -->
+      <div class="tab-panel" id="tab-jornadas">
+        <div class="section-header">
+          <h2 class="section-title">Jornadas</h2>
+          <button class="btn btn-primary" id="btn-nueva-jornada">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+            </svg>
+            Nueva Jornada
+          </button>
+        </div>
+        <div id="jornadas-container"></div>
+        <div class="empty-state" id="empty-jornadas">
+          <div class="empty-icon">📅</div>
+          <p class="empty-title">Sin jornadas registradas</p>
+          <p class="empty-sub">Crea la primera jornada para comenzar a registrar los partidos.</p>
+          <button class="btn btn-primary" id="btn-empty-jornada">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+            </svg>
+            Crear primera jornada
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB: LIGUILLA -->
+      <div class="tab-panel" id="tab-liguilla">
+        <div class="section-header">
+          <h2 class="section-title">Liguilla</h2>
+          <div class="bracket-actions">
+            <span class="bracket-warning" id="bracket-warning" style="display:none">
+              <svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+              <span id="bracket-warning-text"></span>
+            </span>
+            <button class="btn btn-sm btn-secondary" id="btn-reset-liguilla" style="display:none">Reiniciar Bracket</button>
+            <button class="btn btn-primary" id="btn-init-liguilla">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+              Generar Bracket
+            </button>
+          </div>
+        </div>
+        <div id="liguilla-container"></div>
+      </div>
+
+      <!-- TAB: GRÁFICAS -->
+      <div class="tab-panel" id="tab-graficas">
+        <div class="section-header">
+          <h2 class="section-title">Evolución de Posiciones</h2>
+          <div class="grafica-presets">
+            <button class="btn btn-sm btn-secondary" id="btn-graf-todos">Todos</button>
+            <button class="btn btn-sm btn-secondary" id="btn-graf-top8">Top 8</button>
+            <button class="btn btn-sm btn-secondary" id="btn-graf-ninguno">Ninguno</button>
+          </div>
+        </div>
+        <div class="card grafica-card">
+          <div class="grafica-chart-wrap" id="grafica-chart-wrap">
+            <canvas id="grafica-canvas"></canvas>
+          </div>
+          <div class="grafica-empty" id="grafica-empty" style="display:none">
+            <p>No hay jornadas registradas aún.</p>
+          </div>
+          <div class="grafica-teams-wrap">
+            <p class="grafica-teams-label">Filtrar equipos</p>
+            <div class="grafica-teams" id="grafica-teams"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  </div><!-- /app-screen -->
+
+  <!-- ═══════════════════════ MODALS ═══════════════════════ -->
+
+  <!-- MODAL: JORNADA -->
+  <div class="modal-backdrop" id="modal-jornada" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-jornada-title">Nueva Jornada</h3>
+        <button class="modal-close" data-dismiss="modal-jornada">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="jornada-mode">
+        <input type="hidden" id="jornada-edit-id">
+        <div class="form-group" id="jornada-num-group">
+          <label class="form-label">Número de Jornada <span class="form-hint">(máx. 17)</span></label>
+          <input type="number" class="form-input" id="jornada-num" min="1" max="17" placeholder="Ej: 1">
+        </div>
+        <div class="match-rows-editor">
+          <div class="match-rows-header">
+            <span class="form-label">Partidos <span class="form-hint">(máx. 9 por jornada)</span></span>
+            <button type="button" class="btn btn-sm btn-secondary" id="btn-add-row">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+              </svg>
+              Partido
+            </button>
+          </div>
+          <div id="match-rows-list"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" data-dismiss="modal-jornada">Cancelar</button>
+        <button class="btn btn-primary" id="btn-save-jornada">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RESULTADO -->
+  <div class="modal-backdrop" id="modal-resultado" style="display:none">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Editar Resultado</h3>
+        <button class="modal-close" data-dismiss="modal-resultado">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="res-jornada-id">
+        <input type="hidden" id="res-partido-id">
+        <div id="score-editor"></div>
+        <div class="form-group mt-4">
+          <label class="form-toggle">
+            <input type="checkbox" id="res-jugado">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span>Partido jugado</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer modal-footer-split">
+        <button class="btn btn-danger-ghost btn-sm" id="btn-clear-result">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+          Limpiar
+        </button>
+        <div class="modal-footer-right">
+          <button class="btn btn-ghost" data-dismiss="modal-resultado">Cancelar</button>
+          <button class="btn btn-primary" id="btn-save-resultado">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMAR -->
+  <div class="modal-backdrop" id="modal-confirm" style="display:none">
+    <div class="modal modal-xs">
+      <div class="modal-header">
+        <h3 id="confirm-title">Confirmar acción</h3>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message" class="confirm-text"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="btn-confirm-cancel">Cancelar</button>
+        <button class="btn btn-danger" id="btn-confirm-ok">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RESULTADO LIGUILLA -->
+  <div class="modal-backdrop" id="modal-lig-resultado" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="lig-modal-title">Resultado — Liguilla</h3>
+        <button class="modal-close" data-dismiss="modal-lig-resultado">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="lig-match-round">
+        <input type="hidden" id="lig-match-id">
+        <div id="lig-score-editor"></div>
+      </div>
+      <div class="modal-footer modal-footer-split">
+        <button class="btn btn-danger-ghost btn-sm" id="btn-lig-clear">Limpiar</button>
+        <div class="modal-footer-right">
+          <button class="btn btn-ghost" data-dismiss="modal-lig-resultado">Cancelar</button>
+          <button class="btn btn-primary" id="btn-lig-save">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TORNEOS -->
+  <div class="modal-backdrop" id="modal-torneos" style="display:none">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Torneos</h3>
+        <button class="modal-close" data-dismiss="modal-torneos">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="torneos-list" style="margin-bottom:20px"></div>
+        <div class="form-group">
+          <label class="form-label">Nuevo torneo</label>
+          <div class="input-row">
+            <input type="text" class="form-input" id="new-torneo-name" placeholder="Ej: Apertura 2026" maxlength="40">
+            <button class="btn btn-primary" id="btn-crear-torneo">Crear</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" data-dismiss="modal-torneos">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PERFIL -->
+  <div class="modal-backdrop" id="modal-profile" style="display:none">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Mi Perfil</h3>
+        <button class="modal-close" data-dismiss="modal-profile">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Avatar -->
+        <div class="profile-avatar-section">
+          <div class="profile-avatar-preview" id="profile-avatar-preview"></div>
+          <div class="profile-avatar-actions">
+            <input type="file" id="profile-avatar-file" accept="image/*" style="display:none">
+            <button type="button" class="btn btn-sm btn-secondary" id="btn-change-avatar">Cambiar foto</button>
+            <button type="button" class="btn btn-sm btn-danger-ghost" id="btn-remove-avatar" style="display:none">Quitar foto</button>
+          </div>
+        </div>
+        <!-- Campos -->
+        <div class="form-group">
+          <label class="form-label">Nombre completo</label>
+          <input type="text" class="form-input" id="profile-name" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nombre de usuario</label>
+          <input type="text" class="form-input" id="profile-username" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nueva contraseña <span class="form-hint">(dejar vacío para no cambiar)</span></label>
+          <input type="password" class="form-input" id="profile-password" autocomplete="new-password" placeholder="••••••••">
+        </div>
+        <div id="profile-error" class="auth-error" style="display:none"></div>
+        <div id="profile-success" class="auth-success" style="display:none">Perfil actualizado correctamente.</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" data-dismiss="modal-profile">Cancelar</button>
+        <button class="btn btn-primary" id="btn-save-profile">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOASTS -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -559,7 +559,9 @@ input[type="date"].form-input-sm, input[type="time"].form-input-sm { padding-rig
   /* Main */
   .main { padding: 16px 0 80px; }
   .container { padding: 0 12px; }
-  .section-header { gap: 8px; margin-bottom: 12px; }
+  .section-header { gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .section-header .btn { font-size: .75rem; padding: 7px 11px; }
+  .section-header .btn svg { width: 14px; height: 14px; }
 
   /* Tabla — ocultar columnas menos importantes */
   .col-form, .standings-table th.col-form { display: none; }
@@ -1007,7 +1009,10 @@ input[type="date"].form-input-sm, input[type="time"].form-input-sm { padding-rig
   .header-stats { gap: 16px; }
 }
 @media (max-width: 480px) {
-  .torneo-selector { display: none; }
+  /* Selector compacto — nunca ocultar, es la única forma de gestionar torneos */
+  .torneo-selector { max-width: 105px; }
+  .torneo-select { font-size: .7rem; padding: 5px 22px 5px 7px; }
+  .torneo-manage-btn { padding: 4px 5px; }
   .auth-card { padding: 28px 20px; }
 }
 
@@ -1146,7 +1151,15 @@ input[type="date"].form-input-sm, input[type="time"].form-input-sm { padding-rig
 }
 .tour-nav { display: flex; gap: 8px; }
 @media (max-width: 500px) {
-  #tour-card { width: calc(100vw - 24px); padding: 16px 16px 14px; }
-  .tour-title { font-size: .9rem; }
+  #tour-card {
+    width: calc(100vw - 24px) !important;
+    left: 12px !important;
+    right: 12px;
+    padding: 14px 14px 12px;
+  }
+  .tour-title { font-size: .88rem; }
+  .tour-body { font-size: .78rem; }
+  .tour-btn { padding: 7px 12px; font-size: .75rem; }
+  .tour-step-label { font-size: .7rem; }
 }
 

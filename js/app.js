@@ -1701,13 +1701,21 @@ function _tourPosition(targetEl, position) {
   const backdrop  = qs('#tour-backdrop');
   const spotlight = qs('#tour-spotlight');
   const card      = qs('#tour-card');
+  const isMobile  = window.innerWidth <= 500;
 
   if (!targetEl) {
     backdrop.style.display  = '';
     spotlight.style.display = 'none';
-    card.style.transform = 'translate(-50%, -50%)';
-    card.style.top  = '50%';
-    card.style.left = '50%';
+    if (isMobile) {
+      card.style.transform = '';
+      card.style.top  = '50%';
+      card.style.left = '12px';
+      card.style.transform = 'translateY(-50%)';
+    } else {
+      card.style.transform = 'translate(-50%, -50%)';
+      card.style.top  = '50%';
+      card.style.left = '50%';
+    }
     return;
   }
 
@@ -1715,12 +1723,11 @@ function _tourPosition(targetEl, position) {
   spotlight.style.display = '';
   card.style.transform    = '';
 
-  targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
   setTimeout(() => {
     const rect  = targetEl.getBoundingClientRect();
     const pad   = 8;
-    const cardW = 400;
     const vw    = window.innerWidth;
     const vh    = window.innerHeight;
 
@@ -1729,21 +1736,32 @@ function _tourPosition(targetEl, position) {
     spotlight.style.width  = `${rect.width  + pad * 2}px`;
     spotlight.style.height = `${rect.height + pad * 2}px`;
 
-    let top, left;
-    if (position === 'bottom') {
-      top = rect.bottom + pad + 14;
-      if (top + 250 > vh) top = rect.top - pad - 14 - 210;
+    if (isMobile) {
+      // En móvil: tarjeta abajo si hay espacio, arriba si no
+      const cardH = card.offsetHeight || 180;
+      const spaceBelow = vh - rect.bottom - pad - 14;
+      const spaceAbove = rect.top - pad - 14;
+      const top = spaceBelow >= cardH || spaceBelow >= spaceAbove
+        ? rect.bottom + pad + 14
+        : Math.max(8, rect.top - pad - 14 - cardH);
+      card.style.top  = `${Math.min(top, vh - cardH - 8)}px`;
+      card.style.left = '12px';
     } else {
-      top = rect.top - pad - 14 - 210;
-      if (top < 16) top = rect.bottom + pad + 14;
+      const cardW = 400;
+      let top, left;
+      if (position === 'bottom') {
+        top = rect.bottom + pad + 14;
+        if (top + 250 > vh) top = rect.top - pad - 14 - 210;
+      } else {
+        top = rect.top - pad - 14 - 210;
+        if (top < 16) top = rect.bottom + pad + 14;
+      }
+      left = rect.left + rect.width / 2 - cardW / 2;
+      left = Math.max(12, Math.min(left, vw - cardW - 12));
+      top  = Math.max(16, Math.min(top, vh - 230));
+      card.style.top  = `${top}px`;
+      card.style.left = `${left}px`;
     }
-
-    left = rect.left + rect.width / 2 - cardW / 2;
-    left = Math.max(12, Math.min(left, vw - cardW - 12));
-    top  = Math.max(16, Math.min(top, vh - 230));
-
-    card.style.top  = `${top}px`;
-    card.style.left = `${left}px`;
   }, 320);
 }
 

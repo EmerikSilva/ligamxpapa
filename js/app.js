@@ -46,7 +46,7 @@ function closeModal(id) {
   if (!qsa('.modal-backdrop').some(m => m.style.display === 'flex'))
     document.body.style.overflow = '';
 }
-document.addEventListener('click', e => { if (e.target.dataset.dismiss) closeModal(e.target.dataset.dismiss); });
+document.addEventListener('click', e => { const d = e.target.closest('[data-dismiss]'); if (d) closeModal(d.dataset.dismiss); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') qsa('.modal-backdrop').filter(m => m.style.display === 'flex').forEach(m => closeModal(m.id)); });
 qsa('.modal-backdrop').forEach(bd => bd.addEventListener('click', e => { if (e.target === bd) closeModal(bd.id); }));
 
@@ -1142,6 +1142,10 @@ function loginUser(user) {
   renderUserMenu();
   renderTorneoSelector();
   renderAll();
+  if (!TorneoStore.getTorneos(user.id).length) {
+    qs('#welcome-name').textContent = user.name.split(' ')[0];
+    openModal('modal-welcome');
+  }
 }
 
 function initApp() {
@@ -1543,6 +1547,192 @@ qs('#btn-graf-top8').addEventListener('click', () => {
   _visibleTeams   = new Set(standings.slice(0, 8).map(s => s.team.id));
   renderGraficas();
 });
+
+/* ═══════════════════════════════════════════════════════
+   GUIDED TOUR
+═══════════════════════════════════════════════════════ */
+const TOUR_STEPS = [
+  {
+    title: '¡Bienvenido a Liga MX Tracker! 🏆',
+    body: 'Esta guía te lleva por todas las secciones de la app paso a paso para que puedas configurar tu primera temporada. Usa <strong>Siguiente ›</strong> y <strong>‹ Anterior</strong> para navegar, o <strong>Saltar</strong> si prefieres explorar por tu cuenta.',
+    target: null,
+    position: 'center',
+  },
+  {
+    title: '🗂️ Selector de Torneo',
+    body: 'Un <strong>torneo</strong> es una temporada completa — por ejemplo "Clausura 2026" o "Apertura 2025". Este selector muestra el torneo activo y te permite cambiar entre varios. Cada torneo guarda sus propias jornadas, resultados y liguilla de forma independiente.',
+    target: '#torneo-selector-wrap',
+    position: 'bottom',
+  },
+  {
+    title: '⚙️ Gestionar Torneos',
+    body: 'Con este botón (ícono de controles) abres el <strong>panel de torneos</strong>: crea nuevos, renómbralos, cambia entre ellos o elimínalos. <em>El primer paso siempre es crear un torneo antes de agregar jornadas.</em>',
+    target: '#btn-manage-torneos',
+    position: 'bottom',
+  },
+  {
+    title: '📊 Tabla de Posiciones',
+    body: 'La <strong>Tabla</strong> muestra los 18 equipos ordenados por puntos — Victoria = 3 pts, Empate = 1 pt, Derrota = 0. Los <strong>8 primeros</strong> (marcados en verde) clasifican a la Liguilla. La tabla se recalcula automáticamente con cada resultado que captures.',
+    target: 'button[data-tab="tabla"]',
+    position: 'bottom',
+    tab: 'tabla',
+  },
+  {
+    title: '📈 Cómo leer la Tabla',
+    body: '<strong>PJ</strong> Partidos Jugados &nbsp;·&nbsp; <strong>G/E/P</strong> Ganados, Empates, Perdidos &nbsp;·&nbsp; <strong>GF/GC</strong> Goles a Favor y en Contra &nbsp;·&nbsp; <strong>DG</strong> Diferencia de Goles &nbsp;·&nbsp; <strong>Pts</strong> Puntos totales &nbsp;·&nbsp; <strong>Forma</strong> últimos 5 partidos: W=Victoria, D=Empate, L=Derrota.',
+    target: '.standings-table',
+    position: 'bottom',
+    tab: 'tabla',
+  },
+  {
+    title: '📅 Jornadas',
+    body: 'Aquí registras los partidos de cada fecha del torneo. La Liga MX tiene <strong>17 jornadas</strong> con hasta 9 partidos cada una (9 partidos × 2 equipos = los 18 equipos completos). Puedes agregar estadio, fecha y hora de cada encuentro.',
+    target: 'button[data-tab="jornadas"]',
+    position: 'bottom',
+    tab: 'tabla',
+  },
+  {
+    title: '➕ Crear una Jornada',
+    body: 'Haz clic en <strong>"Nueva Jornada"</strong> para agregar una fecha. Elige el número de jornada (1–17) y agrega partidos seleccionando equipo local y visitante. El estadio se rellena automáticamente según el equipo local. Puedes agregar hasta 9 partidos por jornada.',
+    target: '#btn-nueva-jornada',
+    position: 'bottom',
+    tab: 'jornadas',
+  },
+  {
+    title: '⚽ Capturar Resultados',
+    body: 'Una vez creada la jornada, <strong>haz clic en cualquier tarjeta de partido</strong> para abrir el editor de resultado. Ingresa los goles de cada equipo, activa "Partido jugado" y guarda. La tabla se actualiza al instante. La app te ofrecerá capturar el siguiente partido pendiente automáticamente.',
+    target: '#tab-jornadas',
+    position: 'top',
+    tab: 'jornadas',
+  },
+  {
+    title: '🏆 Liguilla (Playoff)',
+    body: 'Cuando los 8 primeros de la tabla estén definidos, usa <strong>"Generar Bracket"</strong> en esta sección. El sistema arma cuartos, semis y gran final automáticamente. Cada ronda se juega con <strong>partido de ida y vuelta</strong>; el marcador global decide al clasificado. En empate global, el mejor sembrado avanza (o puedes elegir manualmente).',
+    target: 'button[data-tab="liguilla"]',
+    position: 'bottom',
+    tab: 'tabla',
+  },
+  {
+    title: '📊 Gráficas de Evolución',
+    body: 'Las gráficas muestran cómo cambió la <strong>posición de cada equipo</strong> jornada a jornada. Usa los filtros inferiores para comparar equipos específicos, ver solo el Top 8 o deseleccionarlos todos. La zona verde indica las posiciones que clasifican a Liguilla.',
+    target: 'button[data-tab="graficas"]',
+    position: 'bottom',
+    tab: 'tabla',
+  },
+  {
+    title: '¡Todo listo! Crea tu primer torneo 🎉',
+    body: 'Ya conoces toda la app. El <strong>primer paso es crear tu torneo</strong>: haz clic en el ícono de ajustes junto al selector, escribe el nombre (ej: "Clausura 2026") y presiona Crear. Después agrega tu primera jornada y comienza a capturar resultados. ¡Suerte!',
+    target: '#btn-manage-torneos',
+    position: 'bottom',
+    tab: 'tabla',
+  },
+];
+
+let _tourStep = 0;
+
+function startTour() {
+  _tourStep = 0;
+  qs('#tour-overlay').style.display = '';
+  qs('#tour-step-total').textContent = TOUR_STEPS.length;
+  _tourGoTo(0);
+}
+
+function endTour() {
+  qs('#tour-overlay').style.display = 'none';
+}
+
+function _tourGoTo(idx) {
+  _tourStep = Math.max(0, Math.min(idx, TOUR_STEPS.length - 1));
+  const step = TOUR_STEPS[_tourStep];
+
+  if (step.tab) {
+    qsa('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === step.tab));
+    qsa('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + step.tab));
+  }
+
+  qs('#tour-title').innerHTML = step.title;
+  qs('#tour-body').innerHTML  = step.body;
+  qs('#tour-step-num').textContent = _tourStep + 1;
+  qs('#tour-prev').style.display = _tourStep === 0 ? 'none' : '';
+
+  const isLast = _tourStep === TOUR_STEPS.length - 1;
+  const hasTorneos = _authUser && TorneoStore.getTorneos(_authUser.id).length > 0;
+  qs('#tour-next').textContent = isLast
+    ? (hasTorneos ? 'Finalizar ✓' : 'Crear mi torneo →')
+    : 'Siguiente ›';
+
+  qs('#tour-dots').innerHTML = TOUR_STEPS.map((_, i) =>
+    `<span class="tour-dot${i === _tourStep ? ' active' : i < _tourStep ? ' done' : ''}"></span>`
+  ).join('');
+
+  _tourPosition(step.target ? qs(step.target) : null, step.position || 'center');
+}
+
+function _tourPosition(targetEl, position) {
+  const backdrop  = qs('#tour-backdrop');
+  const spotlight = qs('#tour-spotlight');
+  const card      = qs('#tour-card');
+
+  if (!targetEl) {
+    backdrop.style.display  = '';
+    spotlight.style.display = 'none';
+    card.style.transform = 'translate(-50%, -50%)';
+    card.style.top  = '50%';
+    card.style.left = '50%';
+    return;
+  }
+
+  backdrop.style.display  = 'none';
+  spotlight.style.display = '';
+  card.style.transform    = '';
+
+  targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  setTimeout(() => {
+    const rect  = targetEl.getBoundingClientRect();
+    const pad   = 8;
+    const cardW = 400;
+    const vw    = window.innerWidth;
+    const vh    = window.innerHeight;
+
+    spotlight.style.top    = `${rect.top  - pad}px`;
+    spotlight.style.left   = `${rect.left - pad}px`;
+    spotlight.style.width  = `${rect.width  + pad * 2}px`;
+    spotlight.style.height = `${rect.height + pad * 2}px`;
+
+    let top, left;
+    if (position === 'bottom') {
+      top = rect.bottom + pad + 14;
+      if (top + 250 > vh) top = rect.top - pad - 14 - 210;
+    } else {
+      top = rect.top - pad - 14 - 210;
+      if (top < 16) top = rect.bottom + pad + 14;
+    }
+
+    left = rect.left + rect.width / 2 - cardW / 2;
+    left = Math.max(12, Math.min(left, vw - cardW - 12));
+    top  = Math.max(16, Math.min(top, vh - 230));
+
+    card.style.top  = `${top}px`;
+    card.style.left = `${left}px`;
+  }, 320);
+}
+
+qs('#tour-next').addEventListener('click', () => {
+  if (_tourStep >= TOUR_STEPS.length - 1) {
+    const hasTorneos = _authUser && TorneoStore.getTorneos(_authUser.id).length > 0;
+    endTour();
+    if (!hasTorneos) { renderTorneosList(); openModal('modal-torneos'); }
+    return;
+  }
+  _tourGoTo(_tourStep + 1);
+});
+
+qs('#tour-prev').addEventListener('click', () => { if (_tourStep > 0) _tourGoTo(_tourStep - 1); });
+qs('#tour-skip').addEventListener('click', endTour);
+
+qs('#btn-welcome-skip').addEventListener('click', () => closeModal('modal-welcome'));
+qs('#btn-welcome-tour').addEventListener('click', () => { closeModal('modal-welcome'); startTour(); });
 
 /* ── Boot ───────────────────────────────────────────── */
 initApp();

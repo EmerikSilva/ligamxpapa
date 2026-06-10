@@ -468,6 +468,51 @@
     </div>
   </div>
 
+  <!-- MODAL: BIENVENIDA (primer acceso sin torneos) -->
+  <div class="modal-backdrop" id="modal-welcome" style="display:none">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>¡Bienvenido, <span id="welcome-name"></span>! 🏆</h3>
+      </div>
+      <div class="modal-body">
+        <div style="text-align:center;font-size:3.5rem;margin-bottom:16px;line-height:1">⚽</div>
+        <p style="color:var(--text-md);font-size:.88rem;line-height:1.65;margin-bottom:10px">
+          Para aprovechar la app, te recomendamos empezar por <strong style="color:var(--text)">crear tu primer torneo</strong>
+          (ej: "Clausura 2026") desde el panel de gestión.
+        </p>
+        <p style="color:var(--text-md);font-size:.88rem;line-height:1.65">
+          ¿Te gustaría que la app te haga un <strong style="color:var(--text)">recorrido guiado</strong>
+          por todas las secciones antes de empezar?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="btn-welcome-skip">Explorar solo</button>
+        <button class="btn btn-primary" id="btn-welcome-tour">Iniciar guía ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOUR OVERLAY -->
+  <div id="tour-overlay" style="display:none">
+    <div id="tour-backdrop"></div>
+    <div id="tour-spotlight"></div>
+    <div id="tour-card">
+      <div class="tour-card-top">
+        <div class="tour-dots" id="tour-dots"></div>
+        <button class="tour-skip-btn" id="tour-skip">✕ Saltar</button>
+      </div>
+      <h3 class="tour-title" id="tour-title"></h3>
+      <p class="tour-body" id="tour-body"></p>
+      <div class="tour-footer">
+        <span class="tour-step-label"><span id="tour-step-num">1</span> / <span id="tour-step-total">11</span></span>
+        <div class="tour-nav">
+          <button class="btn btn-ghost btn-sm" id="tour-prev">‹ Anterior</button>
+          <button class="btn btn-primary btn-sm" id="tour-next">Siguiente ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOASTS -->
   <div class="toast-container" id="toast-container"></div>
 

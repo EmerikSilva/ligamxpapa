@@ -69,7 +69,7 @@ export default function Header({ onOpenProfile, onOpenTorneos, totalJornadas, to
                     <path d="M2 12h20" />
                   </svg>
                 ) : (
-                  <img src="https://a.espncdn.com/i/leaguelogos/soccer/500/262.png"
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/MX_logo.png"
                     className="liga-logo-img" alt="Liga MX" onError={() => setBrandErr(true)} />
                 )}
               </div>

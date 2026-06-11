@@ -120,7 +120,7 @@ function BrandLogo() {
   }
   return (
     <img
-      src="https://a.espncdn.com/i/leaguelogos/soccer/500/262.png"
+      src="https://upload.wikimedia.org/wikipedia/commons/f/f8/MX_logo.png"
       className="auth-logo-img"
       alt="Liga MX"
       onError={() => setErr(true)}

@@ -88,18 +88,11 @@ const SVG = {
 let _tzMode = localStorage.getItem('liga-mx-tz') || 'cdmx';
 
 function cdmxToSonora(fecha, hora) {
-  if (!fecha || !hora) return hora;
-  const ref = new Date(`${fecha}T${hora}:00Z`);
-  const minOf = tz => {
-    const ps = new Intl.DateTimeFormat('en-US', {
-      timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false
-    }).formatToParts(ref);
-    return parseInt(ps.find(p => p.type === 'hour').value) * 60 +
-           parseInt(ps.find(p => p.type === 'minute').value);
-  };
-  const diff = minOf('America/Hermosillo') - minOf('America/Mexico_City');
+  if (!hora) return hora;
+  // CDMX = UTC-6 fijo (México eliminó el horario de verano en 2022)
+  // Sonora = UTC-7 fijo → siempre 1 hora menos
   const [h, m] = hora.split(':').map(Number);
-  const total = ((h * 60 + m + diff) % (24 * 60) + 24 * 60) % (24 * 60);
+  const total = ((h * 60 + m - 60) % (24 * 60) + 24 * 60) % (24 * 60);
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
 }
 

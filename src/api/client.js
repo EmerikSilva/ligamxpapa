@@ -1,8 +1,8 @@
-const TOKEN_KEY = 'liga-mx-token'
+let _token = null
 
-export const getToken  = () => localStorage.getItem(TOKEN_KEY)
-export const setToken  = t  => localStorage.setItem(TOKEN_KEY, t)
-export const clearToken = () => localStorage.removeItem(TOKEN_KEY)
+export const getToken   = () => _token
+export const setToken   = t  => { _token = t }
+export const clearToken = () => { _token = null }
 
 async function callAuth(body) {
   try {
@@ -18,16 +18,7 @@ async function callAuth(body) {
 }
 
 export async function authLogin(username, password) {
-  let bootstrap
-  try {
-    const us = JSON.parse(localStorage.getItem('liga-mx-users') || '[]')
-    const bu = us.find(u => u.username.toLowerCase() === username.trim().toLowerCase())
-    if (bu) {
-      const raw = localStorage.getItem(`liga-mx-data-${bu.id}`)
-      bootstrap = { user: bu, data: raw ? JSON.parse(raw) : null }
-    }
-  } catch {}
-  const r = await callAuth({ action: 'login', username, password, bootstrap })
+  const r = await callAuth({ action: 'login', username, password })
   if (r.token) setToken(r.token)
   return r
 }
@@ -36,15 +27,6 @@ export async function authRegister(username, name, password) {
   const r = await callAuth({ action: 'register', username, name, password })
   if (r.token) setToken(r.token)
   return r
-}
-
-export async function authVerify() {
-  const token = getToken()
-  if (!token) return null
-  const r = await callAuth({ action: 'verify', token })
-  if (r.user) return r.user
-  clearToken()
-  return null
 }
 
 export async function authUpdate(updates) {

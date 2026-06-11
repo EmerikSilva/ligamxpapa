@@ -4,9 +4,9 @@ import { useApp } from '../../context/AppContext'
 
 const FORM_LABEL = { W: 'Victoria', D: 'Empate', L: 'Derrota' }
 
-export default function TablaTab() {
+export default function TablaTab({ isActive }) {
   const { currentTorneo } = useApp()
-  if (!currentTorneo) return null
+  if (!isActive || !currentTorneo) return null
 
   const rows = calculateStandings(currentTorneo.jornadas || [])
 

@@ -63,11 +63,13 @@ export default function App() {
 
       <Nav activeTab={tab} onTabChange={setTab} />
 
-      <main>
-        <TablaTab    isActive={tab === 'tabla'} />
-        <JornadasTab isActive={tab === 'jornadas'} />
-        <LiguillaTab isActive={tab === 'liguilla'} />
-        <GraficasTab isActive={tab === 'graficas'} />
+      <main className="main">
+        <div className="container">
+          <TablaTab    isActive={tab === 'tabla'} />
+          <JornadasTab isActive={tab === 'jornadas'} />
+          <LiguillaTab isActive={tab === 'liguilla'} />
+          <GraficasTab isActive={tab === 'graficas'} />
+        </div>
       </main>
 
       <TorneosModal isOpen={torneosOpen} onClose={() => setTorneosOpen(false)} />

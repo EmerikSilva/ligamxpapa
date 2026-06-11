@@ -12,7 +12,7 @@ const LIGA_MX_TEAMS = [
   { id: 'toluca',    name: 'Toluca',             short: 'TOL',  color: '#CC0000', text: '#FFFFFF', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/223.png',   stadium: 'Estadio Nemesio Díez' },
   { id: 'atlas',     name: 'Atlas FC',           short: 'ATL',  color: '#7B0000', text: '#F5A623', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/216.png',   stadium: 'Estadio Jalisco' },
   { id: 'necaxa',    name: 'Necaxa',             short: 'NEC',  color: '#CC0000', text: '#FFFFFF', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/229.png',   stadium: 'Estadio Victoria' },
-  { id: 'mazatlan',  name: 'Mazatlán FC',        short: 'MAZ',  color: '#5B1A7E', text: '#F7C200', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/20702.png', stadium: 'Estadio El Encanto' },
+  { id: 'mazatlan',  name: 'Atlante',             short: 'ATE',  color: '#003087', text: '#FFD700', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/20702.png', stadium: 'Estadio Azteca/Banorte', extraStadiums: ['Estadio Azteca/Banorte', 'Estadio Azteca'] },
   { id: 'juarez',    name: 'FC Juárez',          short: 'JUA',  color: '#BE1522', text: '#FFFFFF', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/17851.png', stadium: 'Estadio Olímpico Benito Juárez' },
   { id: 'queretaro', name: 'Querétaro',          short: 'QRO',  color: '#0C3F87', text: '#FFFFFF', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/222.png',   stadium: 'Estadio La Corregidora' },
   { id: 'tijuana',   name: 'Club Tijuana',       short: 'TIJ',  color: '#1A1A1A', text: '#CC0000', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/10125.png', stadium: 'Estadio Caliente' },

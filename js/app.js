@@ -84,12 +84,33 @@ const SVG = {
   goal:     `<svg viewBox="0 0 20 20" fill="currentColor" style="width:11px;height:11px"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 6l1.5 3h3l-2.5 2 1 3-3-2-3 2 1-3-2.5-2h3z" fill="currentColor"/></svg>`,
 };
 
+/* ── Timezone ──────────────────────────────────────────── */
+let _tzMode = localStorage.getItem('liga-mx-tz') || 'cdmx';
+
+function cdmxToSonora(fecha, hora) {
+  if (!fecha || !hora) return hora;
+  const ref = new Date(`${fecha}T${hora}:00Z`);
+  const minOf = tz => {
+    const ps = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false
+    }).formatToParts(ref);
+    return parseInt(ps.find(p => p.type === 'hour').value) * 60 +
+           parseInt(ps.find(p => p.type === 'minute').value);
+  };
+  const diff = minOf('America/Hermosillo') - minOf('America/Mexico_City');
+  const [h, m] = hora.split(':').map(Number);
+  const total = ((h * 60 + m + diff) % (24 * 60) + 24 * 60) % (24 * 60);
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+}
+
 /* ── Date/time formatter ───────────────────────────────── */
 function fmtDate(fecha, hora) {
   if (!fecha) return '';
   const d = new Date(fecha + 'T12:00:00');
   const datePart = d.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' });
-  return hora ? `${datePart} ${hora}` : datePart;
+  if (!hora) return datePart;
+  const h = _tzMode === 'sonora' ? cdmxToSonora(fecha, hora) : hora;
+  return `${datePart} ${h}${_tzMode === 'sonora' ? ' Son' : ''}`;
 }
 function sortKey(p) {
   if (!p.fecha) return '9999-99-99T99:99';
@@ -1783,6 +1804,21 @@ qs('#tour-skip').addEventListener('click', endTour);
 
 qs('#btn-welcome-skip').addEventListener('click', () => closeModal('modal-welcome'));
 qs('#btn-welcome-tour').addEventListener('click', () => { closeModal('modal-welcome'); startTour(); });
+
+/* ── Timezone toggle ────────────────────────────────── */
+(function initTzToggle() {
+  const btn = qs('#btn-tz-toggle');
+  const lbl = qs('#tz-toggle-label');
+  if (_tzMode === 'sonora') { lbl.textContent = 'SON'; btn.classList.add('active'); }
+  btn.addEventListener('click', () => {
+    _tzMode = _tzMode === 'cdmx' ? 'sonora' : 'cdmx';
+    localStorage.setItem('liga-mx-tz', _tzMode);
+    lbl.textContent = _tzMode === 'sonora' ? 'SON' : 'CDMX';
+    btn.classList.toggle('active', _tzMode === 'sonora');
+    renderJornadas();
+    renderLiguilla();
+  });
+})();
 
 /* ── Boot ───────────────────────────────────────────── */
 initApp();

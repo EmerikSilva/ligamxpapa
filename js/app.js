@@ -85,12 +85,9 @@ const SVG = {
 };
 
 /* ── Timezone ──────────────────────────────────────────── */
-let _tzMode = localStorage.getItem('liga-mx-tz') || 'cdmx';
-
-function cdmxToSonora(fecha, hora) {
+function cdmxToSonora(hora) {
   if (!hora) return hora;
-  // CDMX = UTC-6 fijo (México eliminó el horario de verano en 2022)
-  // Sonora = UTC-7 fijo → siempre 1 hora menos
+  // CDMX = UTC-6 fijo, Sonora = UTC-7 fijo → siempre 1 hora menos
   const [h, m] = hora.split(':').map(Number);
   const total = ((h * 60 + m - 60) % (24 * 60) + 24 * 60) % (24 * 60);
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
@@ -102,8 +99,7 @@ function fmtDate(fecha, hora) {
   const d = new Date(fecha + 'T12:00:00');
   const datePart = d.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' });
   if (!hora) return datePart;
-  const h = _tzMode === 'sonora' ? cdmxToSonora(fecha, hora) : hora;
-  return `${datePart} ${h}${_tzMode === 'sonora' ? ' Son' : ''}`;
+  return `${datePart} ${hora} / ${cdmxToSonora(hora)} Son`;
 }
 function sortKey(p) {
   if (!p.fecha) return '9999-99-99T99:99';
@@ -1797,21 +1793,6 @@ qs('#tour-skip').addEventListener('click', endTour);
 
 qs('#btn-welcome-skip').addEventListener('click', () => closeModal('modal-welcome'));
 qs('#btn-welcome-tour').addEventListener('click', () => { closeModal('modal-welcome'); startTour(); });
-
-/* ── Timezone toggle ────────────────────────────────── */
-(function initTzToggle() {
-  const btn = qs('#btn-tz-toggle');
-  const lbl = qs('#tz-toggle-label');
-  if (_tzMode === 'sonora') { lbl.textContent = 'SON'; btn.classList.add('active'); }
-  btn.addEventListener('click', () => {
-    _tzMode = _tzMode === 'cdmx' ? 'sonora' : 'cdmx';
-    localStorage.setItem('liga-mx-tz', _tzMode);
-    lbl.textContent = _tzMode === 'sonora' ? 'SON' : 'CDMX';
-    btn.classList.toggle('active', _tzMode === 'sonora');
-    renderJornadas();
-    renderLiguilla();
-  });
-})();
 
 /* ── Boot ───────────────────────────────────────────── */
 initApp();
